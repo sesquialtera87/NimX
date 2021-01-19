@@ -13,8 +13,10 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.EventType;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
@@ -29,22 +31,19 @@ import mth.nim.Pile.DeleteEvent;
 
 public class App extends javafx.application.Application {
 
-    public static enum Player {
+    public enum Player {
         AI, USER
     }
-
-    public static final int PLAYER_TURN = -1;
-    public static final int AI_TURN = 1;
 
     public static final Tuple PILE_CONFIGURATION = new Tuple(1, 2, 3, 4, 5);
 
     private Player player = USER;
-    private IntegerProperty pileChoiche = new SimpleIntegerProperty(-1);
-    private BooleanProperty gameComplete = new SimpleBooleanProperty(false);
+    private final IntegerProperty pileChoice = new SimpleIntegerProperty(-1);
+    private final BooleanProperty gameComplete = new SimpleBooleanProperty(false);
     private int userDeletions = 0;
 
-    Node hoverNode = null;
-    int hoverIndex = -1;
+    private mth.nim.Stage controller;
+
     Pile[] piles;
 
     Nim nim = new Nim(new Tuple(1, 2, 3, 4, 5));
@@ -104,16 +103,22 @@ public class App extends javafx.application.Application {
         gameScene.setTop(new HBox(cp));
         gameScene.setBottom(statusLabel);
 
-        Scene scene = new Scene(gameScene, 400, 400);
+        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("stage.fxml"));
+        Parent node = fxmlLoader.load();
+        controller = fxmlLoader.getController();
+
+
+        Scene scene = new Scene(node, 400, 400);
+        scene.getStylesheets().add("mth/nim/res/style.css");
         stage.setScene(scene);
         stage.setResizable(false);
         stage.setOnShowing(e -> {
             String path = "C:\\Users\\utente\\Documents\\Java\\nim\\Nim\\src\\mth\\nim\\kn.txt";
-            ai.importKnowledge(path);
+//            ai.importKnowledge(path);
         });
         stage.setOnHiding(e -> {
             String path = "C:\\Users\\utente\\Documents\\Java\\nim\\Nim\\src\\mth\\nim\\kn.txt";
-            ai.exportKnowledge(path);
+//            ai.exportKnowledge(path);
         });
         stage.setOnShown(e -> {
             GameDialog d = GameDialog.gameOnStartDialog();
@@ -150,11 +155,11 @@ public class App extends javafx.application.Application {
 
     private void playerMove() {
         System.out.println("Player turn");
-        System.out.println("pile=" + pileChoiche.get() + " total=" + userDeletions + "\n");
+        System.out.println("pile=" + pileChoice.get() + " total=" + userDeletions + "\n");
 
         // get the total deletion of the player and build a move
         Tuple oldState = nim.actualState();
-        Tuple userMove = new Tuple(pileChoiche.get(), userDeletions);
+        Tuple userMove = new Tuple(pileChoice.get(), userDeletions);
         Tuple state = nim.update(userMove);
 
         ai.learn(oldState, state, userMove, NimAi.PLAYER);
@@ -165,7 +170,7 @@ public class App extends javafx.application.Application {
 
         if (gameComplete.not().get()) {
             userDeletions = 0;
-            pileChoiche.set(-1); // remove the pile lock
+            pileChoice.set(-1); // remove the pile lock
 
             player = AI;
             aiTime.playFromStart();
@@ -175,7 +180,7 @@ public class App extends javafx.application.Application {
     private void startNewGame() {
         nim = new Nim(PILE_CONFIGURATION);
         ai.setGame(nim);
-        pileChoiche.set(-1);
+        pileChoice.set(-1);
         userDeletions = 0;
 
         gameScene.setTop(buildScene1());
@@ -214,7 +219,7 @@ public class App extends javafx.application.Application {
         // items = new HashMap<>(nim.getPileCount());
 
         for (int pile = 0; pile < state.getSize(); pile++) {
-            Pile p = new Pile(state.get(pile), pile, pileChoiche);
+            Pile p = new Pile(state.get(pile), pile, pileChoice);
             p.addEventHandler(EventType.ROOT, evt -> {
                 if (evt instanceof DeleteEvent) {
                     System.out.println("User click for deletion");
@@ -240,7 +245,7 @@ public class App extends javafx.application.Application {
         return pane;
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         launch(args);
     }
 }
