@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="NimKtLib">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../samples/CommandLine/Non-modular/CLI/NimKtLib/out/artifacts/NimKtLib_jar/NimKtLib.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
