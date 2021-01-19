@@ -7,7 +7,7 @@ class Tuple(vararg n: Int) {
         fun parse(tuple: String): Tuple {
             val numbers = mutableListOf<Int>()
 
-            "\\d+".toPattern().matcher(tuple).results().forEach { n ->
+            "([+-]?\\d+)".toPattern().matcher(tuple).results().forEach { n ->
                 numbers.add(n.group().toInt())
             }
 
@@ -15,12 +15,11 @@ class Tuple(vararg n: Int) {
         }
     }
 
-    val elements: IntArray
+    val elements: IntArray = IntArray(n.size)
     val size: Int
         get() = elements.size
 
     init {
-        elements = IntArray(n.size)
         n.forEachIndexed { i, number -> elements[i] = number }
     }
 
@@ -29,7 +28,7 @@ class Tuple(vararg n: Int) {
     // }
 
     override fun equals(other: Any?): Boolean {
-        if (!(other is Tuple)) return true
+        if (other !is Tuple) return true
 
         if (other.size != this.size) return false
 
@@ -45,12 +44,13 @@ class Tuple(vararg n: Int) {
     }
 
     override fun toString(): String {
-        if (elements.size == 0) return ""
+        if (elements.isEmpty()) return ""
 
         val b = StringBuilder()
         b.append("(").append(elements[0])
 
-        for (i in 1 until elements.size) b.append(" ").append(elements[i])
+        for (i in 1 until elements.size)
+            b.append(" ").append(elements[i])
 
         b.append(")")
 
