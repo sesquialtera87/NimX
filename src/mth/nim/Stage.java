@@ -4,36 +4,79 @@ import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.ScaleTransition;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.effect.Glow;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.util.Duration;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Stage {
+
+    public static final EventType<Event> MOVE_COMPLETE_EVENT_TYPE = new EventType<>("move_complete");
     @FXML
-    VBox gameBoard;
-    IntegerProperty activePile = new SimpleIntegerProperty(-1);
+    public BorderPane board;
+    protected StackPane tileSurface;
+    protected IntegerProperty activePile = new SimpleIntegerProperty(-1);
+    protected IntegerProperty userDeletions = new SimpleIntegerProperty(0);
+    protected SimpleObjectProperty<App.Player> player = new SimpleObjectProperty<>();
 
     private final List<Pile> piles = new ArrayList<>(6);
 
-    public void initialize() {
-        AtomicInteger i = new AtomicInteger();
-        gameBoard.getChildren().stream()
-                .map(c -> (HBox) c)
-                .forEach(pile -> {
-                    Pile p = new Pile(pile, i.getAndIncrement(), activePile);
-                    piles.add(p);
-                });
+    public final <T extends Event> void addEventHandler(EventType<T> var1, EventHandler<? super T> var2) {
+        board.addEventHandler(var1, var2);
     }
+
+    private <T extends Event> void fireEvent(T event) {
+        board.fireEvent(event);
+    }
+
+    public void popTiles(int pile, int tileCount) {
+        piles.get(pile).pop(tileCount);
+    }
+
+    public void initializeTileSurface() {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("fxml/TileSurface.fxml"));
+            tileSurface = fxmlLoader.load();
+
+            board.setCenter(tileSurface);
+
+            AtomicInteger i = new AtomicInteger();
+            ((Pane) tileSurface.lookup("#tileSurface")).getChildren().stream()
+                    .map(c -> (HBox) c)
+                    .forEach(pile -> {
+                        Pile p = new Pile(pile, i.getAndIncrement(), activePile, player);
+                        p.addEventHandler(EventType.ROOT, e -> {
+                            if (e instanceof DeleteEvent) {
+                                DeleteEvent evt = (DeleteEvent) e;
+                                userDeletions.set(userDeletions.get() + 1);
+                                System.out.println(userDeletions);
+
+                                if (evt.isPileEmpty) {
+                                    fireEvent(new Event(MOVE_COMPLETE_EVENT_TYPE));
+                                }
+                            }
+                        });
+                        piles.add(p);
+                    });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public static class DeleteEvent extends Event {
 
@@ -51,13 +94,17 @@ public class Stage {
 
     static class Pile {
         private final int pileID;
-        public static Event DELETE_EVENT = new Event(EventType.ROOT);
+        private final HBox container;
 
-        public Pile(HBox container, int id, IntegerProperty activePile) {
+        public Pile(HBox container, int id, IntegerProperty activePile, ObjectProperty<App.Player> player) {
             this.pileID = id;
+            this.container = container;
 
             for (Node image : container.getChildren()) {
                 image.addEventHandler(MouseEvent.MOUSE_CLICKED, evt -> {
+                    if (player.get() != App.Player.USER)
+                        return;
+
                     if (activePile.getValue() < 0) {
                         activePile.set(pileID); // lock this pile for future selections
                     } else if (activePile.getValue() != pileID) // do nothing, this is an invalid move
@@ -77,6 +124,28 @@ public class Stage {
                     });
                 });
             }
+        }
+
+        public void pop(int tileCount) {
+            for (int i = 0; i < tileCount; i++) {
+                Node image = container.getChildren().get(container.getChildren().size() - 1 - i);
+
+                ParallelTransition animation = getAnimation(image);
+                animation.setOnFinished(e -> {
+                    image.setVisible(false);
+                    container.getChildren().remove(image);
+
+                    if (container.getChildren().isEmpty()) {
+                        ((VBox) container.getParent()).getChildren().remove(container);
+                        System.out.println("Pile empty, removed from board");
+                    }
+                });
+                animation.playFromStart();
+            }
+        }
+
+        public final <T extends Event> void addEventHandler(EventType<T> var1, EventHandler<? super T> var2) {
+            container.addEventHandler(var1, var2);
         }
 
         public int getPileId() {

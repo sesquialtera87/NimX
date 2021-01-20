@@ -1,34 +1,25 @@
 package mth.nim;
 
-import static mth.nim.App.Player.AI;
-import static mth.nim.App.Player.USER;
-
-import java.util.Optional;
-
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.*;
 import javafx.event.EventType;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
-import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import mth.nim.Pile.DeleteEvent;
+
+import java.util.Optional;
+import java.util.Random;
+
+import static mth.nim.App.Player.USER;
 
 public class App extends javafx.application.Application {
 
@@ -36,25 +27,28 @@ public class App extends javafx.application.Application {
         AI, USER
     }
 
-    public static final Tuple PILE_CONFIGURATION = new Tuple(1, 2, 3, 4, 5);
+    public static final Tuple PILE_CONFIGURATION = new Tuple(5, 4, 3, 2, 1);
 
-    private Player player = USER;
-    private final IntegerProperty pileChoice = new SimpleIntegerProperty(-1);
+    private final SimpleObjectProperty<Player> player = new SimpleObjectProperty<>();
+    private final IntegerProperty activePile = new SimpleIntegerProperty(-1);
     private final BooleanProperty gameComplete = new SimpleBooleanProperty(false);
-    private int userDeletions = 0;
 
-    private mth.nim.Stage controller;
+    private mth.nim.Stage board;
+    private final SimpleIntegerProperty userDeletions = new SimpleIntegerProperty();
 
-    Pile[] piles;
-
-    Nim nim = new Nim(new Tuple(1, 2, 3, 4, 5));
-    Label statusLabel = new Label();
-    NimAi ai = new NimAi(nim);
-    Timeline aiTime;
-    BorderPane gameScene = new BorderPane();
+    private Nim game = new Nim(new Tuple(1, 2, 3, 4, 5));
+    private final NimAi AI = new NimAi(game);
+    private Timeline aiTime;
 
     @Override
     public void start(Stage stage) throws Exception {
+        player.addListener((observableValue, oldV, newV) -> {
+            System.out.println("Player changed -> " + newV);
+            if (newV == Player.AI) {
+                aiTime.playFromStart();
+            }
+        });
+
         gameComplete.addListener(c -> {
             if (gameComplete.get()) {
                 Platform.runLater(() -> {
@@ -63,7 +57,7 @@ public class App extends javafx.application.Application {
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
                     }
-                    Optional<Integer> result = GameDialog.gameCompleteDialog(player).showAndWait();
+                    Optional<Integer> result = GameDialog.gameCompleteDialog(player.get()).showAndWait();
                     result.ifPresent(res -> {
                         if (res == GameDialog.QUIT)
                             Platform.exit();
@@ -74,42 +68,38 @@ public class App extends javafx.application.Application {
             }
 
         });
+
         aiTime = new Timeline();
         aiTime.setAutoReverse(false);
         aiTime.setCycleCount(1);
         aiTime.setDelay(Duration.seconds(1));
-        aiTime.getKeyFrames().add(new KeyFrame(Duration.millis(300), e -> {
-            AiMove();
-        }));
+        aiTime.getKeyFrames().add(new KeyFrame(Duration.millis(300), e -> AiMove()));
 
-        gameScene.setPadding(new Insets(0, 40, 0, 40));
-        gameScene.setStyle("-fx-background-color: #ffe6cc");
-        gameScene.addEventHandler(KeyEvent.KEY_RELEASED, evt -> {
+
+        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("fxml/stage.fxml"));
+        Parent node = fxmlLoader.load();
+        board = fxmlLoader.getController();
+        board.addEventHandler(EventType.ROOT, e -> {
+            if (e.getEventType() == mth.nim.Stage.MOVE_COMPLETE_EVENT_TYPE) {
+                playerMove();
+            }
+        });
+
+        // bindings
+        userDeletions.bindBidirectional(board.userDeletions);
+        activePile.bindBidirectional(board.activePile);
+        player.bindBidirectional(board.player);
+
+        Scene scene = new Scene(node);
+        scene.addEventHandler(KeyEvent.KEY_RELEASED, evt -> {
             if (evt.getCode() == KeyCode.P) {
-                if (player == USER) {
+                if (player.get() == USER) {
                     playerMove();
                     evt.consume();
                 }
                 System.out.println("P pressed");
             }
         });
-
-        ColorPicker cp = new ColorPicker();
-        cp.setOnMouseClicked(e -> {
-            String value = cp.getValue().toString();
-            gameScene.setStyle("-fx-background-color: " + value.replace("0x", "#"));
-        });
-
-        // pane.setCenter(pileNode);
-        gameScene.setTop(new HBox(cp));
-        gameScene.setBottom(statusLabel);
-
-
-        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("fxml/stage.fxml"));
-        Parent node = fxmlLoader.load();
-        controller = fxmlLoader.getController();
-
-        Scene scene = new Scene(node);
         scene.getStylesheets().add("mth/nim/resources/style.css");
         stage.setScene(scene);
         stage.setResizable(false);
@@ -121,26 +111,12 @@ public class App extends javafx.application.Application {
             String path = "C:\\Users\\utente\\Documents\\Java\\nim\\Nim\\src\\mth\\nim\\kn.txt";
 //            ai.exportKnowledge(path);
         });
-        stage.setOnShown(e -> {
-//            GameDialog d = GameDialog.gameOnStartDialog();
-//            d.initOwner(stage.getOwner());
-//            d.showAndWait().ifPresent(result -> {
-//                if (result == GameDialog.QUIT)
-//                    Platform.exit();
-//                else if (result == GameDialog.START_GAME)
-//                    gameScene.setCenter(buildScene1());
-//            });
-
-            DelayedAction.run(() -> ChoiceDialog.showDialog(hPos -> {
-                if (hPos == HPos.LEFT) { // left button pressed
-
-                } else if (hPos == HPos.RIGHT) {
-                    DelayedAction.run(Platform::exit, Duration.millis(1500));
-                }
-                return null;
-            }), Duration.millis(800));
-
-        });
+        stage.setOnShown(e -> DelayedAction.run(() -> ChoiceDialog.showDialog(hPos -> {
+            if (hPos == HPos.LEFT) { // left button pressed
+                DelayedAction.run(this::startNewGame, Duration.millis(1000));
+            } else if (hPos == HPos.RIGHT) DelayedAction.run(Platform::exit, Duration.millis(1500));
+            return null;
+        }), Duration.millis(800)));
         stage.show();
 
     }
@@ -148,112 +124,64 @@ public class App extends javafx.application.Application {
     private void AiMove() {
         System.out.println("AI turn");
 
-        Tuple oldState = nim.actualState();
-        Tuple aiMove = ai.move();
+        Tuple oldState = game.actualState();
+        Tuple aiMove = AI.move();
         int PILE = aiMove.get(0);
         int ELEMENTS_TO_REMOVE = aiMove.get(1);
 
-        Tuple state = nim.update(aiMove);
-        ai.learn(oldState, state, aiMove, NimAi.AI);
+        Tuple state = game.update(aiMove);
+        AI.learn(oldState, state, aiMove, NimAi.AI);
 
         System.out.println(gameComplete);
 
-        piles[PILE].pop(ELEMENTS_TO_REMOVE);
-        player = USER;
+        board.popTiles(PILE, ELEMENTS_TO_REMOVE);
+        player.set(USER);
 
-        gameComplete.set(nim.gameEnded());
+        gameComplete.set(game.gameEnded());
     }
 
     private void playerMove() {
         System.out.println("Player turn");
-        System.out.println("pile=" + pileChoice.get() + " total=" + userDeletions + "\n");
+        System.out.println("pile=" + activePile.get() + " total=" + userDeletions.get() + "\n");
+
+        if (activePile.get() < 0 || userDeletions.get() == 0) {
+            System.err.println("Invalid player move");
+        }
 
         // get the total deletion of the player and build a move
-        Tuple oldState = nim.actualState();
-        Tuple userMove = new Tuple(pileChoice.get(), userDeletions);
-        Tuple state = nim.update(userMove);
+        Tuple oldState = game.actualState();
+        Tuple userMove = new Tuple(activePile.get(), userDeletions.get());
+        Tuple state = game.update(userMove);
 
-        ai.learn(oldState, state, userMove, NimAi.PLAYER);
+        AI.learn(oldState, state, userMove, NimAi.PLAYER);
 
-        gameComplete.set(nim.gameEnded());
+        gameComplete.set(game.gameEnded());
 
-        System.out.println(nim.getPileConfiguration());
+        System.out.println(game.getPileConfiguration());
 
         if (gameComplete.not().get()) {
-            userDeletions = 0;
-            pileChoice.set(-1); // remove the pile lock
+            userDeletions.set(0);
+            activePile.set(-1); // remove the pile lock
 
-            player = AI;
-            aiTime.playFromStart();
+            player.set(Player.AI);
         }
+    }
+
+    private void chooseInitialPlayer() {
+        int value = new Random().nextInt(2);
+
+        player.set(value == 0 ? Player.USER : Player.AI);
     }
 
     private void startNewGame() {
-        nim = new Nim(PILE_CONFIGURATION);
-        ai.setGame(nim);
-        pileChoice.set(-1);
-        userDeletions = 0;
+        game = new Nim(PILE_CONFIGURATION);
+        AI.setGame(game);
 
-        gameScene.setTop(buildScene1());
-        gameScene.requestFocus();
-    }
+        activePile.set(-1);
+        userDeletions.set(0);
 
-    private void updateStatus() {
-        String[] binaries = new String[nim.getPileCount()];
-        int stringLength = 0;
-
-        for (int i = 0; i < nim.getPileCount(); i++) {
-            binaries[i] = Integer.toBinaryString(nim.getPileConfiguration().get(i));
-            stringLength = Math.max(stringLength, binaries[i].length());
-        }
-
-        for (int j = 0; j < binaries.length; j++) {
-            String s = binaries[j];
-
-            if (s.length() < stringLength) {
-                StringBuilder b = new StringBuilder(s);
-
-                for (int i = 0; i < stringLength - s.length(); i++)
-                    b.insert(0, "0");
-
-                binaries[j] = b.toString();
-            }
-        }
-
-        statusLabel.setText(Util.nimSum(binaries));
-    }
-
-    private Node buildScene1() {
-        piles = new Pile[nim.getPileCount()];
-        VBox pane = new VBox();
-        Tuple state = nim.getPileConfiguration();
-        // items = new HashMap<>(nim.getPileCount());
-
-        for (int pile = 0; pile < state.getSize(); pile++) {
-            Pile p = new Pile(state.get(pile), pile, pileChoice);
-            p.addEventHandler(EventType.ROOT, evt -> {
-                if (evt instanceof DeleteEvent) {
-                    System.out.println("User click for deletion");
-
-                    if (userDeletions < nim.getPileConfiguration().get(p.getPileId()))
-                        userDeletions++;
-
-                    System.out.println(((DeleteEvent) evt).isPileEmpty);
-
-                    if (((DeleteEvent) evt).isPileEmpty) {
-                        /* if the pile is empty, automatically switch to the next AI move */
-                        playerMove();
-                    }
-
-                    System.out.println(nim.getPileConfiguration());
-                }
-            });
-            pane.getChildren().add(p);
-
-            piles[pile] = p;
-        }
-
-        return pane;
+        board.initializeTileSurface();
+        chooseInitialPlayer();
     }
 
     public static void main(String[] args) {
