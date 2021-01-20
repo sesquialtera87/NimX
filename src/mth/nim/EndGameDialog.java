@@ -31,16 +31,20 @@ public class EndGameDialog {
         button2.setOnAction(e -> action.run());
     }
 
-    public static void showDialog(Callback<HPos, Void> callback, Image icon) {
+    public static void showDialog(Callback<HPos, Void> callback, Image icon, String text) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("fxml/EndGamePopup.fxml"));
+
             Parent content = fxmlLoader.load();
             content.getStylesheets().add("mth/nim/resources/style.css");
+
             EndGameDialog controller = fxmlLoader.getController();
             controller.iconViewer.setImage(icon);
+            controller.textArea.setText(text);
 
             DialogUtil.CustomDialog dialog = new DialogUtil.CustomDialog(content);
             dialog.openDialog();
+
             controller.setRightButtonAction(() -> {
                 dialog.closeDialog();
                 callback.call(HPos.RIGHT);

@@ -19,6 +19,7 @@ import javafx.util.Callback;
 import javafx.util.Duration;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Random;
 
@@ -58,7 +59,13 @@ public class App extends javafx.application.Application {
                 System.out.println("Game ended. Winner -> " + player);
 
                 Image icon = player.get() == Player.AI ? EndGameDialog.AI_IMAGE : EndGameDialog.PLAYER_IMAGE;
-                DelayedAction.run(() -> EndGameDialog.showDialog(hPos -> null, icon), millis(1000));
+                String text = player.get() == Player.AI ? "Sorry! AI Wins" : "You win!";
+                Callback<HPos, Void> callback = hPos -> {
+                    if (hPos == HPos.LEFT) startNewGame();
+                    else DelayedAction.run(Platform::exit, millis(1000));
+                    return null;
+                };
+                DelayedAction.run(() -> EndGameDialog.showDialog(callback, icon, text.toUpperCase()), millis(1000));
             }
 
         });
@@ -142,6 +149,7 @@ public class App extends javafx.application.Application {
 
         if (activePile.get() < 0 || userDeletions.get() == 0) {
             System.err.println("Invalid player move");
+            return;
         }
 
         // get the total deletion of the player and build a move

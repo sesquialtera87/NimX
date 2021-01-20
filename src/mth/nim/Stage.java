@@ -3,6 +3,7 @@ package mth.nim;
 import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.ScaleTransition;
+import javafx.animation.Transition;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -20,8 +21,12 @@ import javafx.util.Duration;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static javafx.util.Duration.millis;
 
 public class Stage {
 
@@ -47,13 +52,14 @@ public class Stage {
         piles.get(pile).pop(tileCount);
     }
 
-    public void initializeTileSurface() {
+    public List<Transition> initializeTileSurface() {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("fxml/TileSurface.fxml"));
             tileSurface = fxmlLoader.load();
 
             board.setCenter(tileSurface);
 
+            ArrayList<Transition> trans = new ArrayList<>();
             AtomicInteger i = new AtomicInteger();
             ((Pane) tileSurface.lookup("#tileSurface")).getChildren().stream()
                     .map(c -> (HBox) c)
@@ -70,11 +76,14 @@ public class Stage {
                                 }
                             }
                         });
+                        trans.addAll(p.transitions);
                         piles.add(p);
                     });
+            return trans;
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return Collections.emptyList();
     }
 
 
@@ -95,12 +104,22 @@ public class Stage {
     static class Pile {
         private final int pileID;
         private final HBox container;
+        protected ArrayList<Transition> transitions = new ArrayList<>();
 
         public Pile(HBox container, int id, IntegerProperty activePile, ObjectProperty<App.Player> player) {
             this.pileID = id;
             this.container = container;
 
             for (Node image : container.getChildren()) {
+                FadeTransition ft = new FadeTransition(millis(300), image);
+                ft.setFromValue(0.1);
+                ft.setToValue(1.0);
+                ft.setCycleCount(1);
+                ft.setDelay(millis(new Random().nextInt(1000)));
+                transitions.add(ft);
+
+
+
                 image.addEventHandler(MouseEvent.MOUSE_CLICKED, evt -> {
                     if (player.get() != App.Player.USER)
                         return;
@@ -153,13 +172,13 @@ public class Stage {
         }
 
         private static ParallelTransition getAnimation(Node image) {
-            FadeTransition t = new FadeTransition(Duration.millis(500), image);
+            FadeTransition t = new FadeTransition(millis(500), image);
             t.setFromValue(1.0);
             t.setToValue(0.0);
             t.setCycleCount(1);
             t.setAutoReverse(false);
 
-            ScaleTransition st = new ScaleTransition(Duration.millis(500), image);
+            ScaleTransition st = new ScaleTransition(millis(500), image);
             st.setAutoReverse(false);
             st.setCycleCount(1);
             st.setToX(3f);

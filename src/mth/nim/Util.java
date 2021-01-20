@@ -17,7 +17,7 @@ public class Util {
         int index = maxPower.intValue() - 1;
 
         while (q != 0) {
-            System.out.println(String.format("%d %d", q, r));
+            System.out.printf("%d %d%n", q, r);
             representation[index--] = r;
             q = q / 2;
             r = q % 2;
