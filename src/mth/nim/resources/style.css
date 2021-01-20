@@ -12,6 +12,10 @@
     -fx-background-color: rgb(222,222,222);
 }
 
+.dialog . text {
+    -fx-font-size: 18pt;
+}
+
 .dialog .button {
     -fx-background-radius: 20;
     -fx-font-weight: normal;

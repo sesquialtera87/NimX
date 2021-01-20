@@ -11,14 +11,18 @@ import javafx.geometry.HPos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import javafx.util.Duration;
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.Random;
 
+import static javafx.util.Duration.*;
 import static mth.nim.App.Player.USER;
 
 public class App extends javafx.application.Application {
@@ -51,20 +55,10 @@ public class App extends javafx.application.Application {
 
         gameComplete.addListener(c -> {
             if (gameComplete.get()) {
-                Platform.runLater(() -> {
-                    try {
-                        Thread.sleep(800);
-                    } catch (InterruptedException e1) {
-                        e1.printStackTrace();
-                    }
-                    Optional<Integer> result = GameDialog.gameCompleteDialog(player.get()).showAndWait();
-                    result.ifPresent(res -> {
-                        if (res == GameDialog.QUIT)
-                            Platform.exit();
-                        else if (res == GameDialog.START_GAME)
-                            startNewGame();
-                    });
-                });
+                System.out.println("Game ended. Winner -> " + player);
+
+                Image icon = player.get() == Player.AI ? EndGameDialog.AI_IMAGE : EndGameDialog.PLAYER_IMAGE;
+                DelayedAction.run(() -> EndGameDialog.showDialog(hPos -> null, icon), millis(1000));
             }
 
         });
@@ -72,8 +66,8 @@ public class App extends javafx.application.Application {
         aiTime = new Timeline();
         aiTime.setAutoReverse(false);
         aiTime.setCycleCount(1);
-        aiTime.setDelay(Duration.seconds(1));
-        aiTime.getKeyFrames().add(new KeyFrame(Duration.millis(300), e -> AiMove()));
+        aiTime.setDelay(seconds(1));
+        aiTime.getKeyFrames().add(new KeyFrame(millis(300), e -> AiMove()));
 
 
         FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("fxml/stage.fxml"));
@@ -100,7 +94,7 @@ public class App extends javafx.application.Application {
                 System.out.println("P pressed");
             }
         });
-        scene.getStylesheets().add("mth/nim/resources/style.css");
+        Util.style(scene);
         stage.setScene(scene);
         stage.setResizable(false);
         stage.setOnShowing(e -> {
@@ -113,10 +107,10 @@ public class App extends javafx.application.Application {
         });
         stage.setOnShown(e -> DelayedAction.run(() -> ChoiceDialog.showDialog(hPos -> {
             if (hPos == HPos.LEFT) { // left button pressed
-                DelayedAction.run(this::startNewGame, Duration.millis(1000));
-            } else if (hPos == HPos.RIGHT) DelayedAction.run(Platform::exit, Duration.millis(1500));
+                DelayedAction.run(this::startNewGame, millis(1000));
+            } else if (hPos == HPos.RIGHT) DelayedAction.run(Platform::exit, millis(1500));
             return null;
-        }), Duration.millis(800)));
+        }), millis(800)));
         stage.show();
 
     }
@@ -135,9 +129,11 @@ public class App extends javafx.application.Application {
         System.out.println(gameComplete);
 
         board.popTiles(PILE, ELEMENTS_TO_REMOVE);
-        player.set(USER);
 
         gameComplete.set(game.gameEnded());
+
+        if (!gameComplete.get())
+            player.set(USER);
     }
 
     private void playerMove() {

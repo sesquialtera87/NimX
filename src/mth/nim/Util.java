@@ -1,6 +1,13 @@
 package mth.nim;
 
+import javafx.scene.Node;
+import javafx.scene.Scene;
+
 public class Util {
+    public static void style(Scene scene) {
+        scene.getStylesheets().add("mth/nim/resources/style.css");
+    }
+
     public static int[] toBin(int n) {
         Number maxPower = Math.floor(Math.log(n) / Math.log(2));
         int[] representation = new int[maxPower.intValue()];
@@ -40,6 +47,6 @@ public class Util {
     }
 
     public static void main(String[] args) {
-        System.out.println(Util.nimSum(new String[]{"1010011","0100110"}));
+        System.out.println(Util.nimSum(new String[]{"1010011", "0100110"}));
     }
 }
