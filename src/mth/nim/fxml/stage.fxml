@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.effect.GaussianBlur?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane fx:id="background" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+            prefHeight="344.0" prefWidth="368.0" xmlns="http://javafx.com/javafx/11.0.1"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="mth.nim.Stage">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+    </padding>
+    <center>
+        <StackPane prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+            <ImageView fitHeight="400.0" fitWidth="400.0" opacity="0.95" pickOnBounds="true" preserveRatio="true"
+                       StackPane.alignment="CENTER">
+                <effect>
+                    <GaussianBlur radius="3.85"/>
+                </effect>
+                <Image url="@../resources/background.jpg"/>
+            </ImageView>
+            <VBox fx:id="gameBoard" prefHeight="200.0" prefWidth="320.0">
+                <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                        <effect>
+                            <DropShadow color="#b7c312"/>
+                        </effect>
+                        <Image url="@../resources/icon_bat_64.png"/>
+                    </ImageView>
+                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                        <image>
+                            <Image url="@../resources/icon_bat_64.png"/>
+                        </image>
+                        <effect>
+                            <DropShadow color="#b7c312"/>
+                        </effect>
+                    </ImageView>
+                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                        <image>
+                            <Image url="@../resources/icon_bat_64.png"/>
+                        </image>
+                        <effect>
+                            <DropShadow color="#b7c312"/>
+                        </effect>
+                    </ImageView>
+                    <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                        <image>
+                            <Image url="@../resources/icon_bat_64.png"/>
+                        </image>
+                        <effect>
+                            <DropShadow color="#b7c312"/>
+                        </effect>
+                    </ImageView>
+                </HBox>
+                <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+                    <children>
+                        <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../resources/icon_bat_64.png"/>
+                            </image>
+                            <effect>
+                                <DropShadow color="#b7c312"/>
+                            </effect>
+                        </ImageView>
+                        <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../resources/icon_bat_64.png"/>
+                            </image>
+                            <effect>
+                                <DropShadow color="#b7c312"/>
+                            </effect>
+                        </ImageView>
+                        <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../resources/icon_bat_64.png"/>
+                            </image>
+                            <effect>
+                                <DropShadow color="#b7c312"/>
+                            </effect>
+                        </ImageView>
+                        <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../resources/icon_bat_64.png"/>
+                            </image>
+                            <effect>
+                                <DropShadow color="#b7c312"/>
+                            </effect>
+                        </ImageView>
+                    </children>
+                </HBox>
+                <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+                    <children>
+                        <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../resources/icon_bat_64.png"/>
+                            </image>
+                            <effect>
+                                <DropShadow color="#b7c312"/>
+                            </effect>
+                        </ImageView>
+                        <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../resources/icon_bat_64.png"/>
+                            </image>
+                            <effect>
+                                <DropShadow color="#b7c312"/>
+                            </effect>
+                        </ImageView>
+                        <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../resources/icon_bat_64.png"/>
+                            </image>
+                            <effect>
+                                <DropShadow color="#b7c312"/>
+                            </effect>
+                        </ImageView>
+                    </children>
+                </HBox>
+                <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+                    <children>
+                        <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../resources/icon_bat_64.png"/>
+                            </image>
+                            <effect>
+                                <DropShadow color="#b7c312"/>
+                            </effect>
+                        </ImageView>
+                        <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../resources/icon_bat_64.png"/>
+                            </image>
+                            <effect>
+                                <DropShadow color="#b7c312"/>
+                            </effect>
+                        </ImageView>
+                    </children>
+                </HBox>
+                <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+                    <children>
+                        <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../resources/icon_bat_64.png"/>
+                            </image>
+                            <effect>
+                                <DropShadow color="#b7c312"/>
+                            </effect>
+                        </ImageView>
+                    </children>
+                </HBox>
+            </VBox>
+        </StackPane>
+    </center>
+</BorderPane>
