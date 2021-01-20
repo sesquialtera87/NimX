@@ -33,7 +33,6 @@ public class App1 extends javafx.application.Application {
     @Override
     public void start(Stage stage) throws Exception {
 
-
         FXMLLoader fxmlLoader = new FXMLLoader(App1.class.getResource("fxml/stage.fxml"));
         Parent node = fxmlLoader.load();
         board = fxmlLoader.getController();
