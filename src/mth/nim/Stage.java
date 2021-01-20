@@ -51,7 +51,6 @@ public class Stage {
 
     public List<Transition> initializeTileSurface() {
         piles.clear();
-
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("fxml/TileSurface.fxml"));
             tileSurface = fxmlLoader.load();

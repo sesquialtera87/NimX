@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/CoreK/CoreK.iml" filepath="$PROJECT_DIR$/CoreK/CoreK.iml" />
       <module fileurl="file://$PROJECT_DIR$/NimX.iml" filepath="$PROJECT_DIR$/NimX.iml" />
     </modules>
   </component>
