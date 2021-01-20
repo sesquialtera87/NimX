@@ -2,6 +2,7 @@ package mth.nim;
 
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
+import javafx.animation.ParallelTransition;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -33,7 +34,7 @@ public class App extends javafx.application.Application {
         AI, USER
     }
 
-    public static final Tuple PILE_CONFIGURATION = new Tuple(5, 4, 3, 2, 1);
+    public static final String PILE_CONFIGURATION = "5, 4, 3, 2, 1";
 
     private final SimpleObjectProperty<Player> player = new SimpleObjectProperty<>();
     private final IntegerProperty activePile = new SimpleIntegerProperty(-1);
@@ -62,7 +63,7 @@ public class App extends javafx.application.Application {
                 Image icon = player.get() == Player.AI ? EndGameDialog.AI_IMAGE : EndGameDialog.PLAYER_IMAGE;
                 String text = player.get() == Player.AI ? "Sorry! AI Wins" : "You win!";
                 Callback<HPos, Void> callback = hPos -> {
-                    if (hPos == HPos.LEFT) startNewGame();
+                    if (hPos == HPos.LEFT) DelayedAction.run(this::startNewGame, millis(800));
                     else DelayedAction.run(Platform::exit, millis(1000));
                     return null;
                 };
@@ -179,14 +180,20 @@ public class App extends javafx.application.Application {
     }
 
     private void startNewGame() {
-        game = new Nim(PILE_CONFIGURATION);
+        player.set(null);
+        game = new Nim(Tuple.parse(PILE_CONFIGURATION));
         AI.setGame(game);
+
+        System.out.println(game.getPileConfiguration());
+        System.out.println(AI.getGame());
 
         activePile.set(-1);
         userDeletions.set(0);
 
-        board.initializeTileSurface().forEach(Animation::play);
-        chooseInitialPlayer();
+        ParallelTransition pt = new ParallelTransition();
+        pt.getChildren().addAll(board.initializeTileSurface());
+        pt.setOnFinished(e -> chooseInitialPlayer());
+        pt.play();
     }
 
     public static void main(String[] args) {
