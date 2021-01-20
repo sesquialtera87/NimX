@@ -14,6 +14,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.EventType;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -103,13 +104,13 @@ public class App extends javafx.application.Application {
         gameScene.setTop(new HBox(cp));
         gameScene.setBottom(statusLabel);
 
-        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("stage.fxml"));
+
+        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("fxml/stage.fxml"));
         Parent node = fxmlLoader.load();
         controller = fxmlLoader.getController();
 
-
-        Scene scene = new Scene(node, 400, 400);
-        scene.getStylesheets().add("mth/nim/res/style.css");
+        Scene scene = new Scene(node);
+        scene.getStylesheets().add("mth/nim/resources/style.css");
         stage.setScene(scene);
         stage.setResizable(false);
         stage.setOnShowing(e -> {
@@ -121,14 +122,24 @@ public class App extends javafx.application.Application {
 //            ai.exportKnowledge(path);
         });
         stage.setOnShown(e -> {
-            GameDialog d = GameDialog.gameOnStartDialog();
-            d.initOwner(stage.getOwner());
-            d.showAndWait().ifPresent(result -> {
-                if (result == GameDialog.QUIT)
-                    Platform.exit();
-                else if (result == GameDialog.START_GAME)
-                    gameScene.setCenter(buildScene1());
-            });
+//            GameDialog d = GameDialog.gameOnStartDialog();
+//            d.initOwner(stage.getOwner());
+//            d.showAndWait().ifPresent(result -> {
+//                if (result == GameDialog.QUIT)
+//                    Platform.exit();
+//                else if (result == GameDialog.START_GAME)
+//                    gameScene.setCenter(buildScene1());
+//            });
+
+            DelayedAction.run(() -> ChoiceDialog.showDialog(hPos -> {
+                if (hPos == HPos.LEFT) { // left button pressed
+
+                } else if (hPos == HPos.RIGHT) {
+                    DelayedAction.run(Platform::exit, Duration.millis(1500));
+                }
+                return null;
+            }), Duration.millis(800));
+
         });
         stage.show();
 

@@ -13,10 +13,13 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.util.Duration;
 
+import java.io.Serial;
+
 public class Pile extends HBox {
 
     public static class DeleteEvent extends Event {
 
+        @Serial
         private static final long serialVersionUID = 1L;
         public int pile;
         public boolean isPileEmpty = false;

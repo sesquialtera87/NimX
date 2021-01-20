@@ -17,7 +17,7 @@ public class GameDialog extends Dialog<Integer> {
 
     public static final int START_GAME = 0;
     public static final int QUIT = -1;
-    private static Font font = Font.loadFont(App.class.getResourceAsStream("BRLNSR.TTF"), 16.0);
+    private static final Font font = Font.loadFont(App.class.getResourceAsStream("BRLNSDT.TTF"), 16.0);
 
     public static final int START_DIALOG = -432;
     public static final int GAME_COMPLETE_DIALOG = 542;

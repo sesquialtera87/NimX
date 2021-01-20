@@ -1,0 +1,24 @@
+.root{
+    -fx-font-size: 16pt;
+    -fx-font-family: "Inter";
+    -fx-background: rgb(225, 228, 203);
+}
+
+.background {
+    -fx-background-color: #D8AF44;
+}
+
+.dialog {
+    -fx-background-color: rgb(222,222,222);
+}
+
+.dialog .button {
+    -fx-background-radius: 20;
+    -fx-font-weight: normal;
+    -fx-font-size: 18pt;
+}
+
+.message-label{
+    -fx-background-color: #D17935;
+    -fx-background-radius: 10;
+}
