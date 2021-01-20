@@ -1,5 +1,6 @@
 package mth.nim;
 
+import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -184,7 +185,7 @@ public class App extends javafx.application.Application {
         activePile.set(-1);
         userDeletions.set(0);
 
-        board.initializeTileSurface();
+        board.initializeTileSurface().forEach(Animation::play);
         chooseInitialPlayer();
     }
 

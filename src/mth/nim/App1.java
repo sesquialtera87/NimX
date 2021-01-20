@@ -49,7 +49,7 @@ public class App1 extends javafx.application.Application {
             DelayedAction.run(() -> {
                 List<Transition> transitions = board.initializeTileSurface();
                 for (Transition t : transitions)
-                    t.play();
+                    t.playFromStart();
 
             }, millis(1500));
         });

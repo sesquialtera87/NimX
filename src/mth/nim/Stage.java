@@ -1,9 +1,6 @@
 package mth.nim;
 
-import javafx.animation.FadeTransition;
-import javafx.animation.ParallelTransition;
-import javafx.animation.ScaleTransition;
-import javafx.animation.Transition;
+import javafx.animation.*;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -111,9 +108,11 @@ public class Stage {
             this.container = container;
 
             for (Node image : container.getChildren()) {
-                FadeTransition ft = new FadeTransition(millis(300), image);
-                ft.setFromValue(0.1);
-                ft.setToValue(1.0);
+                image.setOpacity(0.0);
+
+                FadeTransition ft = new FadeTransition(millis(400), image);
+                ft.setToValue(1);
+                ft.setInterpolator(Interpolator.EASE_OUT);
                 ft.setCycleCount(1);
                 ft.setDelay(millis(new Random().nextInt(1000)));
                 transitions.add(ft);
